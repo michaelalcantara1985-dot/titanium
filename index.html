@@ -75,32 +75,32 @@ body{background:var(--bg);color:var(--text);padding-bottom:80px;-webkit-tap-high
 <script>
 const TREINOS = {
   A: { nome: 'Peito + Tríceps', ex: [
-    {nome: 'Supino Reto', video: 'dQw4w9WgXcQ'},
-    {nome: 'Crucifixo Inclinado', video: 'dQw4w9WgXcQ'},
-    {nome: 'Tríceps Pulley', video: 'dQw4w9WgXcQ'},
-    {nome: 'Tríceps Testa', video: 'dQw4w9WgXcQ'}
+    {nome: 'Supino Reto', imagem: 'https://images.unsplash.com/photo-1534367610401-9f5ed68180aa', series: '4x 8-12'},
+    {nome: 'Crucifixo Inclinado', imagem: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b', series: '3x 10-15'},
+    {nome: 'Tríceps Pulley', imagem: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5', series: '3x 12-15'},
+    {nome: 'Tríceps Testa', imagem: 'https://images.unsplash.com/photo-1594381898411-846e7d193883', series: '4x 8-12'}
   ]},
   B: { nome: 'Costas + Bíceps', ex: [
-    {nome: 'Puxada Alta', video: 'dQw4w9WgXcQ'},
-    {nome: 'Remada Curvada', video: 'dQw4w9WgXcQ'},
-    {nome: 'Rosca Direta', video: 'dQw4w9WgXcQ'},
-    {nome: 'Rosca Martelo', video: 'dQw4w9WgXcQ'}
+    {nome: 'Puxada Alta', imagem: 'https://images.unsplash.com/photo-1605296867304-46d5465a13f1', series: '4x 8-12'},
+    {nome: 'Remada Curvada', imagem: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438', series: '4x 8-12'},
+    {nome: 'Rosca Direta', imagem: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e', series: '3x 10-12'},
+    {nome: 'Rosca Martelo', imagem: 'https://images.unsplash.com/photo-1584863231364-2edc166de576', series: '3x 10-12'}
   ]},
   C: { nome: 'Perna Completa', ex: [
-    {nome: 'Agachamento Livre', video: 'dQw4w9WgXcQ'},
-    {nome: 'Leg Press 45', video: 'dQw4w9WgXcQ'},
-    {nome: 'Cadeira Extensora', video: 'dQw4w9WgXcQ'},
-    {nome: 'Mesa Flexora', video: 'dQw4w9WgXcQ'}
+    {nome: 'Agachamento Livre', imagem: 'https://images.unsplash.com/photo-1434608519344-49d77a699e1d', series: '4x 8-12'},
+    {nome: 'Leg Press 45', imagem: 'https://images.unsplash.com/photo-1579758629938-03607ccdbaba', series: '4x 10-15'},
+    {nome: 'Cadeira Extensora', imagem: 'https://images.unsplash.com/photo-1595078475328-1ab05d0a6a0e', series: '3x 12-15'},
+    {nome: 'Mesa Flexora', imagem: 'https://images.unsplash.com/photo-1518611012118-696072aa579a', series: '3x 12-15'}
   ]},
   D: { nome: 'Ombro + Trapézio', ex: [
-    {nome: 'Desenvolvimento', video: 'dQw4w9WgXcQ'},
-    {nome: 'Elevação Lateral', video: 'dQw4w9WgXcQ'},
-    {nome: 'Encolhimento', video: 'dQw4w9WgXcQ'}
+    {nome: 'Desenvolvimento', imagem: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61', series: '4x 8-12'},
+    {nome: 'Elevação Lateral', imagem: 'https://images.unsplash.com/photo-1606889464198-fcb18894cf50', series: '3x 12-15'},
+    {nome: 'Encolhimento', imagem: 'https://images.unsplash.com/photo-1603287681836-b174ce5074c2', series: '4x 10-15'}
   ]},
   E: { nome: 'Braço + Core', ex: [
-    {nome: 'Rosca Concentrada', video: 'dQw4w9WgXcQ'},
-    {nome: 'Tríceps Francês', video: 'dQw4w9WgXcQ'},
-    {nome: 'Prancha Abdominal', video: 'dQw4w9WgXcQ'}
+    {nome: 'Rosca Concentrada', imagem: 'https://images.unsplash.com/photo-1598575281946-63c0a01f2f1a', series: '3x 10-12'},
+    {nome: 'Tríceps Francês', imagem: 'https://images.unsplash.com/photo-1517963879433-6ad2b056d712', series: '3x 10-12'},
+    {nome: 'Prancha Abdominal', imagem: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b', series: '3x 30-60s'}
   ]}
 };
 
@@ -135,23 +135,24 @@ function renderTreino() {
   const treino = TREINOS[treinoAtual];
   container.innerHTML = `<h2 style="margin-bottom:16px">${treino.nome}</h2>` + 
     treino.ex.map((ex, i) => `
-    <div class="exercise" id="ex-${i}">
-      <div class="ex-header">
-        <div class="ex-name">${ex.nome}</div>
-        <div class="ex-check" onclick="toggleCheck(${i})" id="check-${i}"></div>
-      </div>
-      <div class="ex-inputs">
-        <div><label>Carga</label><input type="number" id="carga-${i}" placeholder="kg" onblur="saveData()"></div>
-        <div><label>Reps</label><input type="number" id="reps-${i}" placeholder="12" onblur="saveData()"></div>
-        <div><label>RPE</label><input type="number" id="rpe-${i}" placeholder="8" max="10" onblur="saveData()"></div>
-      </div>
-      <div class="hist" id="hist-${i}"></div>
-      <div class="ex-actions">
-        <button class="btn btn-video" onclick="window.open('https://youtube.com/watch?v=${ex.video}')">Ver Execução</button>
-        <button class="btn btn-sub" onclick="subEx(${i})">Substituir</button>
-      </div>
+  <div class="exercise" id="ex-${i}" style="background:#1A1A1A;padding:16px;margin-bottom:16px;border-radius:12px">
+    <div class="ex-header" style="margin-bottom:12px">
+      <div class="ex-name" style="color:#00FF88;font-size:18px;font-weight:600;margin-bottom:4px">${ex.nome}</div>
+      <div style="color:#A0A0A0;font-size:14px">${ex.series}</div>
     </div>
-  `).join('');
+    <div class="ex-inputs">
+      <div><label>Carga</label><input type="number" id="carga-${i}"></div>
+      <div><label>Reps</label><input type="number" id="reps-${i}"></div>
+      <div><label>RPE</label><input type="number" id="rpe-${i}"></div>
+    </div>
+    <div class="hist" id="hist-${i}"></div>
+    <div class="ex-actions" style="margin-top:12px">
+      <a href="${ex.imagem}" target="_blank" style="text-decoration:none;display:block">
+        <button style="width:100%;height:48px;background:#0088FF;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600">Ver Execução</button>
+      </a>
+    </div>
+  </div>
+`).join('');
   loadData();
 }
 
