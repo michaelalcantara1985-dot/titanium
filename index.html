@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Titanium Training Pro</title>
+<style>
+:root {
+  --bg: #0A0A0A;
+  --card: #1A1A1A;
+  --text: #FFFFFF;
+  --text2: #A0A0A0;
+  --green: #00FF88;
+  --red: #FF4444;
+  --blue: #0088FF;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+body{background:var(--bg);color:var(--text);padding-bottom:80px;-webkit-tap-highlight-color:transparent}
+.header{padding:20px;text-align:center;border-bottom:1px solid #2A2A2A;position:sticky;top:0;background:var(--bg);z-index:10}
+.header h1{font-size:24px;font-weight:800;color:var(--green)}
+.timer-top{font-size:14px;color:var(--text2);margin-top:5px}
+.tabs{display:flex;gap:8px;padding:16px;overflow-x:auto;background:var(--bg);position:sticky;top:73px;z-index:9}
+.tab{padding:12px 20px;background:var(--card);border:2px solid #2A2A2A;border-radius:12px;font-weight:700;white-space:nowrap;cursor:pointer}
+.tab.active{background:var(--green);color:#000;border-color:var(--green)}
+.container{padding:16px}
+.exercise{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid #2A2A2A}
+.ex-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.ex-name{font-size:18px;font-weight:700}
+.ex-check{width:28px;height:28px;border:2px solid var(--green);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ex-check.done{background:var(--green);color:#000}
+.ex-check.done::after{content:'✓';font-size:20px;font-weight:900}
+.ex-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.ex-inputs input{background:#0A0A0A;border:1px solid #2A2A2A;border-radius:8px;padding:12px;color:var(--text);font-size:16px;text-align:center}
+.ex-inputs label{font-size:12px;color:var(--text2);text-align:center;margin-bottom:4px}
+.ex-actions{display:flex;gap:8px}
+.btn{flex:1;padding:14px;border:none;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer}
+.btn-video{background:var(--blue);color:#fff}
+.btn-sub{background:#2A2A2A;color:var(--text)}
+.hist{font-size:12px;color:var(--text2);margin-top:8px}
+.hist.good{color:var(--green)}
+.rest-timer{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:20px 30px;border-radius:20px;font-weight:900;font-size:24px;z-index:100;display:none;box-shadow:0 10px 40px rgba(0,255,136,0.4)}
+.rest-timer.show{display:block}
+.rest-controls{display:flex;gap:8px;margin-top:10px}
+.rest-btn{background:#000;color:var(--green);border:none;padding:8px 12px;border-radius:8px;font-weight:700}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid #2A2A2A;padding:12px;display:flex;gap:8px}
+.start-btn{flex:1;background:var(--green);color:#000;padding:16px;border:none;border-radius:12px;font-weight:900;font-size:16px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>TITANIUM TRAINING PRO</h1>
+  <div class="timer-top" id="workoutTimer">Tempo de treino: 00:00</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+<div class="container" id="container"></div>
+
+<div class="rest-timer" id="restTimer">
+  <div id="restTime">60</div>
+  <div class="rest-controls">
+    <button class="rest-btn" onclick="adjustRest(-15)">-15s</button>
+    <button class="rest-btn" onclick="pauseRest()">⏸</button>
+    <button class="rest-btn" onclick="adjustRest(15)">+15s</button>
+    <button class="rest-btn" onclick="skipRest()">Pular</button>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <button class="start-btn" onclick="startWorkout()">COMEÇAR TREINO</button>
+</div>
+
+<script>
+const TREINOS = {
+  A: { nome: 'Peito + Tríceps', ex: [
+    {nome: 'Supino Reto', video: 'dQw4w9WgXcQ'},
+    {nome: 'Crucifixo Inclinado', video: 'dQw4w9WgXcQ'},
+    {nome: 'Tríceps Pulley', video: 'dQw4w9WgXcQ'},
+    {nome: 'Tríceps Testa', video: 'dQw4w9WgXcQ'}
+  ]},
+  B: { nome: 'Costas + Bíceps', ex: [
+    {nome: 'Puxada Alta', video: 'dQw4w9WgXcQ'},
+    {nome: 'Remada Curvada', video: 'dQw4w9WgXcQ'},
+    {nome: 'Rosca Direta', video: 'dQw4w9WgXcQ'},
+    {nome: 'Rosca Martelo', video: 'dQw4w9WgXcQ'}
+  ]},
+  C: { nome: 'Perna Completa', ex: [
+    {nome: 'Agachamento Livre', video: 'dQw4w9WgXcQ'},
+    {nome: 'Leg Press 45', video: 'dQw4w9WgXcQ'},
+    {nome: 'Cadeira Extensora', video: 'dQw4w9WgXcQ'},
+    {nome: 'Mesa Flexora', video: 'dQw4w9WgXcQ'}
+  ]},
+  D: { nome: 'Ombro + Trapézio', ex: [
+    {nome: 'Desenvolvimento', video: 'dQw4w9WgXcQ'},
+    {nome: 'Elevação Lateral', video: 'dQw4w9WgXcQ'},
+    {nome: 'Encolhimento', video: 'dQw4w9WgXcQ'}
+  ]},
+  E: { nome: 'Braço + Core', ex: [
+    {nome: 'Rosca Concentrada', video: 'dQw4w9WgXcQ'},
+    {nome: 'Tríceps Francês', video: 'dQw4w9WgXcQ'},
+    {nome: 'Prancha Abdominal', video: 'dQw4w9WgXcQ'}
+  ]}
+};
+
+let treinoAtual = 'A';
+let workoutStart = null;
+let workoutInterval = null;
+let restTime = 60;
+let restInterval = null;
+let restPaused = false;
+
+function init() {
+  renderTabs();
+  renderTreino();
+  loadData();
+}
+
+function renderTabs() {
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = Object.keys(TREINOS).map(t => 
+    `<div class="tab ${t===treinoAtual?'active':''}" onclick="trocarTreino('${t}')">Treino ${t}</div>`
+  ).join('');
+}
+
+function trocarTreino(t) {
+  treinoAtual = t;
+  renderTabs();
+  renderTreino();
+}
+
+function renderTreino() {
+  const container = document.getElementById('container');
+  const treino = TREINOS[treinoAtual];
+  container.innerHTML = `<h2 style="margin-bottom:16px">${treino.nome}</h2>` + 
+    treino.ex.map((ex, i) => `
+    <div class="exercise" id="ex-${i}">
+      <div class="ex-header">
+        <div class="ex-name">${ex.nome}</div>
+        <div class="ex-check" onclick="toggleCheck(${i})" id="check-${i}"></div>
+      </div>
+      <div class="ex-inputs">
+        <div><label>Carga</label><input type="number" id="carga-${i}" placeholder="kg" onblur="saveData()"></div>
+        <div><label>Reps</label><input type="number" id="reps-${i}" placeholder="12" onblur="saveData()"></div>
+        <div><label>RPE</label><input type="number" id="rpe-${i}" placeholder="8" max="10" onblur="saveData()"></div>
+      </div>
+      <div class="hist" id="hist-${i}"></div>
+      <div class="ex-actions">
+        <button class="btn btn-video" onclick="window.open('https://youtube.com/watch?v=${ex.video}')">Ver Execução</button>
+        <button class="btn btn-sub" onclick="subEx(${i})">Substituir</button>
+      </div>
+    </div>
+  `).join('');
+  loadData();
+}
+
+function toggleCheck(i) {
+  const check = document.getElementById(`check-${i}`);
+  check.classList.toggle('done');
+  if(check.classList.contains('done')) {
+    saveData();
+    startRest(60);
+  }
+  saveData();
+}
+
+function startWorkout() {
+  if(!workoutStart) {
+    workoutStart = Date.now();
+    workoutInterval = setInterval(updateWorkoutTimer, 1000);
+    document.querySelector('.start-btn').textContent = 'TREINO EM ANDAMENTO';
+    document.querySelector('.start-btn').style.background = '#FF4444';
+  } else {
+    clearInterval(workoutInterval);
+    alert(`Treino finalizado em ${document.getElementById('workoutTimer').textContent}`);
+    workoutStart = null;
+    document.querySelector('.start-btn').textContent = 'COMEÇAR TREINO';
+    document.querySelector('.start-btn').style.background = 'var(--green)';
+  }
+}
+
+function updateWorkoutTimer() {
+  const diff = Math.floor((Date.now() - workoutStart) / 1000);
+  const min = Math.floor(diff / 60).toString().padStart(2,'0');
+  const sec = (diff % 60).toString().padStart(2,'0');
+  document.getElementById('workoutTimer').textContent = `Tempo de treino: ${min}:${sec}`;
+}
+
+function startRest(seconds) {
+  restTime = seconds;
+  restPaused = false;
+  document.getElementById('restTimer').classList.add('show');
+  updateRestDisplay();
+  clearInterval(restInterval);
+  restInterval = setInterval(() => {
+    if(!restPaused) {
+      restTime--;
+      updateRestDisplay();
+      if(restTime <= 0) {
+        endRest();
+        navigator.vibrate && navigator.vibrate([200,100,200]);
+      }
+    }
+  }, 1000);
+}
+
+function updateRestDisplay() {
+  document.getElementById('restTime').textContent = restTime;
+}
+
+function adjustRest(s) {
+  restTime = Math.max(0, restTime + s);
+  updateRestDisplay();
+}
+
+function pauseRest() {
+  restPaused =!restPaused;
+}
+
+function skipRest() {
+  endRest();
+}
+
+function endRest() {
+  clearInterval(restInterval);
+  document.getElementById('restTimer').classList.remove('show');
+}
+
+function saveData() {
+  const data = {};
+  TREINOS[treinoAtual].ex.forEach((ex, i) => {
+    data[i] = {
+      carga: document.getElementById(`carga-${i}`)?.value || '',
+      reps: document.getElementById(`reps-${i}`)?.value || '',
+      rpe: document.getElementById(`rpe-${i}`)?.value || '',
+      done: document.getElementById(`check-${i}`)?.classList.contains('done') || false,
+      date: new Date().toISOString().split('T')[0]
+    };
+  });
+  localStorage.setItem(`titanium-${treinoAtual}`, JSON.stringify(data));
+  updateHist();
+}
+
+function loadData() {
+  const data = JSON.parse(localStorage.getItem(`titanium-${treinoAtual}`) || '{}');
+  Object.keys(data).forEach(i => {
+    if(document.getElementById(`carga-${i}`)) {
+      document.getElementById(`carga-${i}`).value = data[i].carga;
+      document.getElementById(`reps-${i}`).value = data[i].reps;
+      document.getElementById(`rpe-${i}`).value = data[i].rpe;
+      if(data[i].done) document.getElementById(`check-${i}`).classList.add('done');
+    }
+  });
+  updateHist();
+}
+
+function updateHist() {
+  // Mostra carga da última vez que fez
+  const lastData = JSON.parse(localStorage.getItem(`titanium-${treinoAtual}-last`) || '{}');
+  TREINOS[treinoAtual].ex.forEach((ex, i) => {
+    const hist = document.getElementById(`hist-${i}`);
+    if(lastData[i]?.carga) {
+      const atual = document.getElementById(`carga-${i}`).value;
+      if(atual && parseFloat(atual) > parseFloat(lastData[i].carga)) {
+        hist.innerHTML = `Semana passada: ${lastData[i].carga}kg | <span class="good">+${(parseFloat(atual)-parseFloat(lastData[i].carga)).toFixed(1)}kg 💪</span>`;
+        hist.classList.add('good');
+      } else {
+        hist.innerHTML = `Semana passada: ${lastData[i].carga}kg`;
+      }
+    }
+  });
+}
+
+function subEx(i) {
+  alert('Função de substituir: Em breve você vai escolher entre Supino Inclinado, Crucifixo, etc');
+}
+
+// Salva última sessão ao finalizar
+window.addEventListener('beforeunload', () => {
+  const data = localStorage.getItem(`titanium-${treinoAtual}`);
+  if(data) localStorage.setItem(`titanium-${treinoAtual}-last`, data);
+});
+
+init();
+</script>
+</body>
+</html>
